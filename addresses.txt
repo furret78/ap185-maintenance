@@ -1,0 +1,152 @@
+Override as follows if the option Itemize Loadout Upgrades is enabled:
+Check First Card Slot Upgrade Unlock (1 -> 2)
+4a859 - 3 bytes
+Original: 0F 8F BF
+Modified: 90 E9 BF
+This changes it to NOP and then JMP.
+
+Check Second Card Slot Upgrade Unlock (2 -> 3)
+4a953 - Same as above
+
+Third Upgrade (3 -> 4)
+4aa4d - Same as above
+
+Fourth Upgrade
+4ab47 - Same as above
+
+Fifth Upgrade
+4ac41 - 2 bytes
+Original: 7F 1F
+Modified: EB 1F
+
+Sixth Upgrade (6 -> 7)
+Same address where the all-slots achievement is announced.
+This one actually checks if it's less than 7 in order to unlock 7 cards.
+Change it to use "Jump short if less than or equal" (7E) instead of "Jump short if greater" (7F)
+Remember to delete the commands to actually unlock the slots since we are only looking for the achievement function
+4ac95 - 1 byte
+Original: 7F
+Modified: 7E
+
+Actual slot unlock + equip cost unlock lines + alert.
+Just set all of it to NOP (90).
+Slot:
+4ac97 - 6A 07
+4ac99 - E8 72 D4 FF FF
+Alert:
+4ac9e - 8b 0d 48 7c 4d 00
+4aca4 - 6A 06
+4aca6 - e8 05 d6 ff ff
+Cost:
+4acab - 68 5e 01 00 00
+4acb0 - e8 db d6 ff ff
+30 bytes in total. To simplify, overwrite from 4ac97 with a length of 30 with a bytearray of just 0x90.
+In a loop starting from 0, go up to 29 and then stop if >= 30.
+
+
+Check if at least 4 bosses are dead yet
+Original code tells the game to skip the entire logic chain if less than that are dead
+4a834 - 4 bytes
+Original: 0f 8c 85 04
+Modified: 90 90 90 90
+
+Check if at least 7 bosses are dead yet
+4a922 - 4 bytes
+Original: 0f 8c 97 03
+Modified: 90 90 90 90
+
+Check for 10 bosses
+4aa1c - 4 bytes
+Original: 0f 8c 9d 02
+Modified: 90 90 90 90
+
+Check for 12 bosses
+4ab16 - 4 bytes
+Original: 0f 8c a3 01
+Modified: 90 90 90 90
+
+Check for 14 bosses
+4ac10 - 3 bytes
+Original: 0f 8c a9
+Modified: 90 90 90
+
+Check for 16 bosses
+4ac66 - 2 bytes
+Original: 7c 57
+Modified: 90 90
+
+
+
+
+
+Actual boss data table calculation:
+MENU_STATIC_ADDRESS + (0x267c0 + arg1 * 0x1d + arg2) (offset)
+The IDs in the Python file count from 0. Need to +2 before checking the data.
+From Tsukasa onwards, that's +1.
+If Chimata, +0. If Nitori, +11. If Takane, +3.
+
+arg1 = Stage ID
+arg2 = Boss ID
+
+Tutorial - arg1 = 1
+arg2 list
+01 - Mike Goutokuji
+
+1st Market - arg1 = 2
+arg2 list
+02 - Mike Goutokuji
+03 - Minoriko Aki
+04 - Eternity Larva
+05 - Nemuno Sakata
+
+2nd Market - arg1 = 3
+arg2 list
+06 - Cirno
+07 - Wakasagihime
+08 - Sekibanki
+09 - Urumi Ushizaki
+
+3rd Market - arg1 = 4
+arg2 list
+0A (10) - Eika Ebisu
+0B (11) - Kutaka Niwatari
+0C (12) - Narumi Yatadera
+0D (13) - Komachi Onozuka
+
+4th Market - arg1 = 5
+arg2 list
+0E (14) - Sanae Kochiya
+0F (15) - Sakuya Izayoi
+10 (16) - Youmu Konpaku
+11 (17) - Reimu Hakurei
+1B (27) - Nitori Kawashiro
+
+5th Market - arg1 = 6
+arg2 list
+12 (18) - Tsukasa Kudamaki
+13 (19) - Megumu Iizunamaru
+14 (20) - Clownpiece
+15 (21) - Tenshi Hinanawi
+
+6th Market - arg1 = 7
+arg2 list
+16 (22) - Suika Ibuki
+17 (23) - Mamizou Futatsuiwa
+18 (24) - Saki Kurokoma
+19 (25) - Momoyo Himemushi
+1C (28) - Takane Yamashiro
+
+missing: 1A (26) - Chimata Tenkyuu (uses same stage ID as takane)
+
+Challenge Market - arg1 = 9
+arg2 list
+16 (22) - Suika Ibuki
+17 (23) - Mamizou Futatsuiwa
+18 (24) - Saki Kurokoma
+19 (25) - Momoyo Himemushi
+
+d1028 - last defeated boss
+during normal stages, anything not in the above list is no boss
+unreliable during challenge market
+
+If Junko's card is equipped, all normal waves are replaced with boss waves. That means bosses arrive right on Wave 1.
