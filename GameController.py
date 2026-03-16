@@ -52,7 +52,7 @@ class GameController:
         """
         Returns True if in a stage.
         """
-        return int.from_bytes(self.pm.read_bytes(self.pm.base_address + ADDR_CURRENT_STAGE_PTR, 2)) != 0
+        return self.pm.read_int(self.pm.base_address + ADDR_CURRENT_STAGE_PTR) != 0
 
     def check_if_in_game(self):
         """
